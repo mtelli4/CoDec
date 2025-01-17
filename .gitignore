@@ -1,0 +1,43 @@
+# Fichiers compilés
+*.o
+*.so
+*.a
+*.out
+*.exe
+*.gdb
+*.dll
+*.dylib
+
+# Répertoires générés
+obj/
+bin/
+build/
+PGM/
+DIFF/
+
+# Fichiers de build/IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Fichiers spécifiques au projet
+pgmtodif
+diftopgm
+
+# Fichiers temporaires et logs
+*.log
+*.tmp
+core
+.DS_Store
+
+# Fichiers de dépendances
+.depend
+
+# Fichiers d'images générés
+*.pgm
+*.diff
+*.pnm
+
+# Fichiers de configuration locaux
+local_config.h
