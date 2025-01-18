@@ -15,16 +15,17 @@ static DifImg* dim = NULL;
 static unsigned char* display_img = NULL;
 static bool show_differential = false;
 static bool show_histogram = false;
+static float compression_rate = 0.0;
 
 // Callbacks pour l'interface graphique
 void toggle_differential(void) {
     show_differential = !show_differential;
-    glutPostRedisplay();  // Use GLUT's redraw function instead of g2x_Redraw
+    glutPostRedisplay();
 }
 
 void toggle_histogram(void) {
     show_histogram = !show_histogram;
-    glutPostRedisplay();  // Use GLUT's redraw function instead of g2x_Redraw
+    glutPostRedisplay();
 }
 
 void display_func(void) {
@@ -113,6 +114,8 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    printf("Loading image %s...\n", argv[1]);
+
     // Chargement de l'image
     int width, height;
     unsigned char* img = load_pgm(argv[1], &width, &height);
@@ -121,6 +124,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    printf("Image loaded successfully. Width: %d, Height: %d\n", width, height);
     // Création de l'image différentielle
     dim = create_difimg(width, height);
     if (!dim) {

@@ -15,19 +15,16 @@ static DifImg* dim = NULL;
 static unsigned char* display_img = NULL;
 static bool show_differential = false;
 static bool show_histogram = false;
-extern void g2x_Redraw(void);
-extern void g2x_Clear(void);
-extern void g2x_WriteString(double x, double y, const char* text);
 
 // Callbacks pour l'interface graphique
 void toggle_differential(void) {
     show_differential = !show_differential;
-    g2x_Redraw();
+    glutPostRedisplay();
 }
 
 void toggle_histogram(void) {
     show_histogram = !show_histogram;
-    g2x_Redraw();
+    glutPostRedisplay();
 }
 
 // Fonction d'affichage principale
@@ -35,8 +32,8 @@ void display_func(void) {
     if (!dim || !display_img) return;
     
     // Effacement de l'écran
-    g2x_Clear();
-    
+    glClear(GL_COLOR_BUFFER_BIT);
+
     int size = dim->width * dim->height;
 
     // Préparation de l'image à afficher
@@ -106,6 +103,7 @@ void display_func(void) {
             );
         }
     }
+        glutSwapBuffers();
 }
 
 int main(int argc, char** argv) {
