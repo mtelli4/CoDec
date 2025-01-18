@@ -7,40 +7,33 @@
 #include <g2x_draw.h>
 #include <g2x_control.h>
 #include <g2x_window.h>  
-#include <GL/freeglut.h>
+#include <GL/glut.h>
+#include <GL/gl.h>
 
 // Variables globales pour l'interface graphique
 static DifImg* dim = NULL;
 static unsigned char* display_img = NULL;
 static bool show_differential = false;
 static bool show_histogram = false;
-static float compression_rate = 0.0;
-extern bool g2x_SetDisplayFunc(void (*f)(void));
-extern void g2x_Redraw(void);
-extern void g2x_Clear(void);
-extern void g2x_WriteString(double x, double y, const char* text);
 
 // Callbacks pour l'interface graphique
-static void toggle_differential(void) {
+void toggle_differential(void) {
     show_differential = !show_differential;
-    glutPostRedisplay();
+    glutPostRedisplay();  // Use GLUT's redraw function instead of g2x_Redraw
 }
 
-static void toggle_histogram(void) {
+void toggle_histogram(void) {
     show_histogram = !show_histogram;
-    glutPostRedisplay();
+    glutPostRedisplay();  // Use GLUT's redraw function instead of g2x_Redraw
 }
 
-
-// Fonction d'affichage principale
 void display_func(void) {
-    if (!dim) return;
+    if (!dim || !display_img) return;
     
     // Effacement de l'écran
-		glClear(GL_COLOR_BUFFER_BIT);
-
+    glClear(GL_COLOR_BUFFER_BIT);
+    
     int size = dim->width * dim->height;
-    if (!display_img) return;
 
     // Préparation de l'image à afficher
     if (show_differential) {
@@ -48,19 +41,18 @@ void display_func(void) {
             display_img[i] = (unsigned char)(128 + dim->dif[i] / 2);
         }
     } else {
-        memcpy(display_img, dim->img, size);
+        reconstruct_image(dim, display_img);
     }
 
-    // Affichage de l'image
+    // Même logique d'affichage
     double img_width = g2x_GetXMax() - g2x_GetXMin();
     double img_height = g2x_GetYMax() - g2x_GetYMin();
-    if (show_histogram) img_height *= 0.7; // Réserve de l'espace pour l'histogramme
+    if (show_histogram) img_height *= 0.7;
 
     double scale_x = img_width / dim->width;
     double scale_y = img_height / dim->height;
     double scale = (scale_x < scale_y) ? scale_x : scale_y;
 
-    // Position de départ pour centrer l'image
     double start_x = (img_width - (dim->width * scale)) / 2 + g2x_GetXMin();
     double start_y = (img_height - (dim->height * scale)) / 2 + g2x_GetYMin();
 
@@ -86,7 +78,6 @@ void display_func(void) {
         int histogram[256] = {0};
         int max_count = 0;
 
-        // Calcul de l'histogramme
         for (int i = 0; i < size; i++) {
             histogram[display_img[i]]++;
             if (histogram[display_img[i]] > max_count) {
@@ -94,13 +85,11 @@ void display_func(void) {
             }
         }
 
-        // Zone de dessin de l'histogramme
         double hist_y = g2x_GetYMin();
         double hist_height = g2x_GetYMax() * 0.2;
         double hist_width = g2x_GetXMax() - g2x_GetXMin();
         double bar_width = hist_width / 256.0;
 
-        // Dessin des barres
         G2Xcolor hist_color = {0.5, 0.5, 0.5, 1.0};
         for (int i = 0; i < 256; i++) {
             double height = (histogram[i] * hist_height) / max_count;
@@ -114,11 +103,9 @@ void display_func(void) {
         }
     }
 
-    // Affichage du taux de compression
-    char info[64];
-    snprintf(info, sizeof(info), "Compression: %.2f:1", compression_rate);
-    g2x_WriteString(g2x_GetXMin() + 10, g2x_GetYMax() - 20, info);
+    glutSwapBuffers();
 }
+
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -201,16 +188,15 @@ int main(int argc, char** argv) {
     free(buffer);
     free(img);
 
-    // Configuration de l'interface graphique
+        // Configuration de l'interface graphique
     g2x_InitWindow("Image Encoder", width, height);
     
     // Ajout des contrôles
     g2x_CreateSwitch("Show Differential", &show_differential, "Toggle differential view");
-		g2x_CreateSwitch("Show Histogram", &show_histogram, "Toggle histogram view");
+    g2x_CreateSwitch("Show Histogram", &show_histogram, "Toggle histogram view");
     
     // Configuration des fonctions de callback
-    g2x_SetDisplayFunc(display_func);
-    
+    glutDisplayFunc(display_func);    
     // Lancement de la boucle principale
     return g2x_MainStart();
 }

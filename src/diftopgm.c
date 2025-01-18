@@ -7,6 +7,8 @@
 #include <g2x_draw.h>
 #include <g2x_control.h>
 #include <g2x_window.h>  
+#include <GL/glut.h>
+#include <GL/gl.h>
 
 // Variables globales pour l'interface graphique
 static DifImg* dim = NULL;
@@ -199,8 +201,7 @@ int main(int argc, char** argv) {
 		g2x_CreateSwitch("Show Histogram", &show_histogram, "Toggle histogram view");
     
     // Configuration des fonctions de callback
-    g2x_SetDisplayFunc(display_func);
-    
+    glutDisplayFunc(display_func);    
     // Lancement de la boucle principale
     return g2x_MainStart();
 }
